@@ -1,0 +1,3 @@
+include HISTORY.rst LICENSE.txt README.rst tox.ini tests/incoming tests/incoming/one
+recursive-include tests/* *.conf *.py
+recursive-include tests *.py
