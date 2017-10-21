@@ -16,7 +16,8 @@ class MessageRules:
         for key, message in messages.items():
             try:
                 with open(outgoing_directory + '/' + key, 'w') as outfile:
-                    json.dump(message, outfile)
+                    json.dump(message, outfile, sort_keys=True,
+                              indent=4, separators=(',', ': '))
             except Exception as err:
                 print('failed to write ' + key + ' in ' +
                       outgoing_directory + ': ' + str(err))
