@@ -32,19 +32,35 @@ class MessageRules:
 
     def load_messages(self, directory):
         messages = {}
-        for filename in self._recursive_file_gen(directory):
-            print('loading ' + filename)
+        exclude_pat = re.compile('.*/\..*')
+        filename_pat = re.compile('.*/(.*?)/(.*?)\.conf.*')
+        for filepath in self._recursive_file_gen(directory):
+            exclude_match = exclude_pat.match(filepath)
+            if exclude_match is not None:
+                continue
+            print('loading incoming message ' + filepath)
+            filename_match = filename_pat.match(filepath)
+            in_dir = filename_match.group(1)
+            filename = filename_match.group(2)
             try:
-                message = json.loads(open(filename).read())
-                key = filename.replace(directory, '')
+                message = json.loads(open(filepath).read())
+                message['.message-filename'] = filename
+                message['.message-filename-lowercase'] = filename.lower()
+                message['.message-in-dir'] = in_dir
+                key = filepath.replace(directory, '')
                 messages[re.sub(r"^/", '', key)] = message
             except Exception as err:
-                print('failed to load ' + filename + ': ' + str(err))
+                print('failed to load ' + filepath + ': ' + str(err))
 
         return messages
 
     def load_rules_from_directory(self, directory):
+        pat = re.compile('.*\/\..*')
         for f in self._recursive_file_gen(directory):
+            match = pat.match(f)
+            if match is not None:
+                continue
+            print('loading rule ' + f)
             try:
                 thing = json.loads(open(f).read())
                 if isinstance(thing, dict):
@@ -58,8 +74,8 @@ class MessageRules:
                             message['order'] = 0
                         if 'is_not_a_rule' not in message:
                             self.loaded_configs.append(message)
-            except:
-                print('failed to load ' + f)
+            except Exception as err:
+                print('failed to load ' + f + ': ' + str(err))
         self.rules = sorted(self.loaded_configs, key=lambda k: k['order'])
         return True
 

@@ -1,3 +1,3 @@
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 from .message_rules import MessageRules  # noqa: F401
