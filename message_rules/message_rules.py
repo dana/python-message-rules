@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import errno
 from message_match import mmatch
 from message_transform import mtransform
 
@@ -11,11 +12,20 @@ class MessageRules:
         self.rules = []
 
     def output_apply_rules(self, incoming_directory, outgoing_directory):
+        if not os.path.exists(outgoing_directory):
+            os.makedirs(outgoing_directory)
         messages = self.load_messages(incoming_directory)
         self.apply_rules(messages)
         for key, message in messages.items():
+            filename = outgoing_directory + '/' + key
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
+                        raise
             try:
-                with open(outgoing_directory + '/' + key, 'w') as outfile:
+                with open(filename, 'w') as outfile:
                     json.dump(message, outfile, sort_keys=True,
                               indent=4, separators=(',', ': '))
             except Exception as err:
@@ -40,8 +50,16 @@ class MessageRules:
                 continue
             print('loading incoming message ' + filepath)
             filename_match = filename_pat.match(filepath)
-            in_dir = filename_match.group(1)
-            filename = filename_match.group(2)
+            in_dir = 'unknown'
+            filename = 'unknown'
+            if filename_match is not None:
+                in_dir = filename_match.group(1)
+                filename = filename_match.group(2)
+            else:
+                sub_pat = re.compile('.*?/(.*?)\.conf.*')
+                filename_match = sub_pat.match(filepath)
+                if filename_match is not None:
+                    filename = filename_match.group(1)
             try:
                 message = json.loads(open(filepath).read())
                 message['.message-filename'] = filename

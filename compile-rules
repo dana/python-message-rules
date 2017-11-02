@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# source: https://github.com/dana/python-message-rules
+# docs: http://pythonhosted.org/message-rules
+
+docker pull dana/compile-rules:latest
+
+workdir=$(pwd)
+
+echo $workdir
+
+docker run -i -t -v $workdir:/compile dana/compile-rules:latest

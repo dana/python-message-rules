@@ -26,8 +26,8 @@ setuptools.setup(
     url='https://github.com/dana/python-message-rules',
     packages=['message_rules'],
     extras_require={
-        'dev': ['check-manifest'],
-        'test': ['sys', 'pytest']
+        'dev': ['check-manifest', 'message_transform', 'message_rules'],
+        'test': ['message_transform', 'message_rules', 'sys', 'pytest']
     },
     license='MIT',
     classifiers=[
